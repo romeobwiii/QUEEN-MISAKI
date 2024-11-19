@@ -1,5 +1,5 @@
-<a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
-<h1 align="center">QUEEN-MISAKI </h1>
+<a><img src=https://files.catbox.moe/fvc67e.jpg/></a>
+<h1 align="center">The_Blood_Flairy </h1>
 <h1 align="center"> 𝚃𝙷𝙸𝚂 𝙱𝙾𝚃 𝚆𝙰𝚂 𝙳𝙴𝚅𝙴𝙻𝙾𝙿𝙴𝙳 𝙱𝚈 𝚁𝙾𝙼𝙴𝙾 𝙱𝚆 𝙸𝙸𝙸 🔆🥳𝙴𝙽𝙹𝙾𝚈 𝙸𝚃
 </h1>
 
