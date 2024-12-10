@@ -1,15 +1,9 @@
 <a><img src=https://files.catbox.moe/fvc67e.jpg/></a>
-<h1 align="center">𝚀𝚞𝚎𝚎𝚗 𝙼𝚒𝚜𝚊𝚔𝚒 </h1>
-<h1 align="center"> 𝚃𝙷𝙸𝚂 𝙱𝙾𝚃 𝚆𝙰𝚂 𝙳𝙴𝚅𝙴𝙻𝙾𝙿𝙴𝙳 𝙱𝚈 𝚁𝙾𝙼𝙴𝙾 𝙱𝚆 𝙸𝙸𝙸 🔆🥳𝙴𝙽𝙹𝙾𝚈 𝙸𝚃
+<h1 align="center">Spider-Man_MD </h1>
+<h1 align="center"> THIS BOT IS POWERED BY ROMEO BW III.THE BOT IT IS USED BY EVERYONE STAR IT AND FORK IT PLEASE 
 </h1>
 
-*𝗛𝗢𝗦𝗧 𝗢𝗡 𝗗𝗜𝗦𝗖𝗢𝗥𝗗**
-<details>
-<summary>CLICK FOR MORE</summary>
-<a href=https:  /archive/refs/heads/main.zip"><img src="https://img.shields.io/badge/DOWNLOAD%20FILES-yellow" alt="Rainhost Files" width="150"></a>
-  
-<a href="https://bot-hosting.net/?aff=1259151615210819614"><img src="https://img.shields.io/badge/SIGNUP%20&%20DEPLOY-gold" alt="Scalingo Deploy" width="150"></a>
-</details
+
 
 <a><img src='https://i.imgur.com/LyHic3i.gif'/></a>
 
