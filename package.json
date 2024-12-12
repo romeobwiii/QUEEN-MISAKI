@@ -1,6 +1,6 @@
 {
   "name": "Spider-Man",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "description": "Spider-Man_MD WhatsApp bot was created by Romeo Bw III With using Node.js",
   "main": "index.js",
   "scripts": {
