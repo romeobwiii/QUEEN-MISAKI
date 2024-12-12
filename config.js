@@ -1,16 +1,102 @@
-const fs = require('fs');
-if (fs.existsSync('config.env')) require('dotenv').config({ path: './config.env' });
+import { watchFile, unwatchFile } from 'fs'
+import chalk from 'chalk'
+import { fileURLToPath } from 'url'
+import fs from 'fs'
 
-function convertToBool(text, fault = 'true') {
-    return text === fault ? true : false;
+import dotenv from 'dotenv'
+dotenv.config()
+
+const defaultOwner = '923337468951';
+
+
+// Check for the OWNERS environment variable; if not found, use the default
+const ownervb = process.env.OWNERS || process.env.OWNER_NUMBER || 'your number';  // put your number here
+
+const ownerlist = ownervb.split(';');
+
+global.owner = [];
+for (let i = 0; i < ownerlist.length; i++) {
+    global.owner.push([ownerlist[i], true]);
 }
-module.exports = {
-SESSION_ID: process.env.SESSION_ID || "eyJub2lzZUtleSI6eyJwcml2YXRlIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoibUUwYkcyRUovdWh4QXQxQmpJSFhXWGN6bURBTjhIQVNMalhkdFpoTHpXMD0ifSwicHVibGljIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiYlRBU3VadmxweWxXSjc1ZTJ1L0swdVJJZEp1aWlTNGh3bWN1TG1GSSszQT0ifX0sInBhaXJpbmdFcGhlbWVyYWxLZXlQYWlyIjp7InByaXZhdGUiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiJpQ0E2WXlvNEI4QS9NNFdVOFNad2VjZ1BaUjluSUFlVWN2bG90Q0pEUEh3PSJ9LCJwdWJsaWMiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiJBSjhXcjZMN040TkNPUGc4eSt1cnZjSC9vTXQzS0g5aUp6YVU2QTgrNm13PSJ9fSwic2lnbmVkSWRlbnRpdHlLZXkiOnsicHJpdmF0ZSI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6ImtFdCtxY3l5Q0tWdUFacFNmbWM2Rjh5MUhkcThJbFBFR25GVDBINFR2a289In0sInB1YmxpYyI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6ImlEWXhmK3dCWGNhQVpCekdyeS9HWTkzcVZkOW1US1JIVWNsRWFzRlUwM2c9In19LCJzaWduZWRQcmVLZXkiOnsia2V5UGFpciI6eyJwcml2YXRlIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiQ0M3Tjl4c1lRcHFYM2QvR2cyWnA2OW0xTlVZSW51TEhreDN1TldJR0xsdz0ifSwicHVibGljIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoibk92ZmNrT1pBVkhYbnVFQkRhTWUwQXZzdHNwaEdnWWV0dHdWaExaTjBuaz0ifX0sInNpZ25hdHVyZSI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6IlhtZFMxZFpGOW1DOHZ1ano3bisvVElPTXdUY2ZONm81WlVNMkgvbDVTOUVFeklhOTY0QmV1RXNSaG1ieUt4d3FrWExNTVZFeWw3am52dmlwUGtTVUFBPT0ifSwia2V5SWQiOjF9LCJyZWdpc3RyYXRpb25JZCI6MiwiYWR2U2VjcmV0S2V5Ijoiell5QzE5M3FDNkc3dytTRk8xV0ttMWZNNVRZc0YvbDZWNzJuUHg3QUU2RT0iLCJwcm9jZXNzZWRIaXN0b3J5TWVzc2FnZXMiOltdLCJuZXh0UHJlS2V5SWQiOjMxLCJmaXJzdFVudXBsb2FkZWRQcmVLZXlJZCI6MzEsImFjY291bnRTeW5jQ291bnRlciI6MCwiYWNjb3VudFNldHRpbmdzIjp7InVuYXJjaGl2ZUNoYXRzIjpmYWxzZX0sImRldmljZUlkIjoiZHhBay1uQl9Td2k3a3c1M3ZZNGtIQSIsInBob25lSWQiOiJlYTAzNTUyYS0yMWU3LTQxYTQtYjkyYy0zNzZlM2FjNDc4NmUiLCJpZGVudGl0eUlkIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoibmxiZVdidUdZT1JGRDRuUDBoVGExcDRXZDRrPSJ9LCJyZWdpc3RlcmVkIjp0cnVlLCJiYWNrdXBUb2tlbiI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6IngyMzVhVGpORUhpbjBVRDNMRmVnR2FUdEtmbz0ifSwicmVnaXN0cmF0aW9uIjp7fSwicGFpcmluZ0NvZGUiOiJMR1hWTTFaWCIsIm1lIjp7ImlkIjoiMjY3NzY2NjA5MDI6MTVAcy53aGF0c2FwcC5uZXQiLCJuYW1lIjoi8J2agfCdmb7wnZm88J2ZtPCdmb4g8J2ZsfCdmoYg8J2ZuPCdmbjwnZm4WyDwnZqB8J2Zs10ifSwiYWNjb3VudCI6eyJkZXRhaWxzIjoiQ05yNXdhWURFT2FoNjdvR0dCb2dBQ2dBIiwiYWNjb3VudFNpZ25hdHVyZUtleSI6IkRvQnAwUXRCVEN4NXM3blVUbGdKUWdXd2ROMGkzbXBxTWJxMDJ3YWd0VFU9IiwiYWNjb3VudFNpZ25hdHVyZSI6IkpIYzJZL2M2dUVXMW5lOFB5Z0JrNkhGUmJHNGhVbU9ZaGFzdmZLSzRNN2N6cUlhVWZlR3J0cUhPUGdtendsTTF5cm4xYzV1NVVzM2JmNWFlcFlmZkRBPT0iLCJkZXZpY2VTaWduYXR1cmUiOiJvZTBsMnE1Rk1PeG03NWFRVTVTWkNGY2RieFFLTU51aG1Bb29JcXlwQTgvS3FVSERsSEZUcE5nalU0MDBtM1lCMm12UDczQ1lVYldROC92aE4wb0VBUT09In0sInNpZ25hbElkZW50aXRpZXMiOlt7ImlkZW50aWZpZXIiOnsibmFtZSI6IjI2Nzc2NjYwOTAyOjE1QHMud2hhdHNhcHAubmV0IiwiZGV2aWNlSWQiOjB9LCJpZGVudGlmaWVyS2V5Ijp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiQlE2QWFkRUxRVXdzZWJPNTFFNVlDVUlGc0hUZEl0NXFhakc2dE5zR29MVTEifX1dLCJwbGF0Zm9ybSI6InNtYmEiLCJsYXN0QWNjb3VudFN5bmNUaW1lc3RhbXAiOjE3MzQwMDQ5ODF9", //paste your session_id
-AUTO_READ_STATUS: process.env.AUTO_READ_STATUS || "true", 
-MODE: process.env.MODE || "public",
-AUTO_VOICE: process.env.AUTO_VOICE || "true",
-AUTO_STICKER: process.env.AUTO_STICKER || "false",
-AUTO_REPLY: process.env.AUTO_REPLY || "false",
-AUTO_REACT: process.env.AUTO_REACT || "true",
-FAKE_RECORDING: process.env.FAKE_RECORDING || "true",    
-};
+//
+global.botname = process.env.BOTNAME || 'SANA_MD-V1';
+global.pairingNumber = process.env.BOT_NUMBER || 'your number';  // put your number here
+global.SESSION_ID = process.env.SESSION_ID || 'session id';  /eyJub2lzZUtleSI6eyJwcml2YXRlIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoidUVTcXRjeHpJdk5aRzdMT2xzdTlKdjVkem1XUzRYZWZYeXdTb2Q0bUdXdz0ifSwicHVibGljIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiUDdUZ25MWVUxa1QrZmZOSGFYSnRsT2dDWi9WbDFKeFl5MlQ0T2YxcFdqVT0ifX0sInBhaXJpbmdFcGhlbWVyYWxLZXlQYWlyIjp7InByaXZhdGUiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiJxR0hIR1hyUmRGaWp3djhXeXhOL3JZSlRZaXJya2dGOEozTmtZN09NUTNBPSJ9LCJwdWJsaWMiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiI5ek5OTWxLRkVUeHBQSC90MWowMFpOQkNYUlR0YUVCSjBEa0Z0NEJCOWpnPSJ9fSwic2lnbmVkSWRlbnRpdHlLZXkiOnsicHJpdmF0ZSI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6IjJMbUo3dUk5UjliZDVhVVA5ZnZQTVp4Y0lCd1RpL3BKalZFQmFNNVV6RmM9In0sInB1YmxpYyI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6IlRyeWtuTW9CVHB1dit2YTBMWG9YM2kzdGloL0wwVlgwQkFudldXdmZnWEU9In19LCJzaWduZWRQcmVLZXkiOnsia2V5UGFpciI6eyJwcml2YXRlIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiYUxGcStTWTd3bHNlT1d2SmMzZC9EMmRZWnFET3NpOUFwQ2lkRWJ2bU9WQT0ifSwicHVibGljIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiWFp6d3J6T1ZYbU50STdVemNpRnljNUpWck41TE91MXExTjcxV1pmV253dz0ifX0sInNpZ25hdHVyZSI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6IkdXRWNtbCtVcTNJdHZ6QUFGSU9UV1p2SlNER213ZHZsZVRRdjFnbUZLUSs0eExhZE9tZGY5VVhHU3NIUDZIY0k3eWtBY3p1emYrSUxpRmJUYjNnVWl3PT0ifSwia2V5SWQiOjF9LCJyZWdpc3RyYXRpb25JZCI6MTksImFkdlNlY3JldEtleSI6IkR3dThFTy9QamhPWHNjSU1UY3pyQUN5K0xVQXlkVWprWGcrbjNWY0lMZ2M9IiwicHJvY2Vzc2VkSGlzdG9yeU1lc3NhZ2VzIjpbXSwibmV4dFByZUtleUlkIjozMSwiZmlyc3RVbnVwbG9hZGVkUHJlS2V5SWQiOjMxLCJhY2NvdW50U3luY0NvdW50ZXIiOjAsImFjY291bnRTZXR0aW5ncyI6eyJ1bmFyY2hpdmVDaGF0cyI6ZmFsc2V9LCJkZXZpY2VJZCI6IndqLVMtekZ4UUNhaXVmTnoxWm85c3ciLCJwaG9uZUlkIjoiNmRiNTMxZWItYzFmYi00YTk2LWJhMGQtMmE1NDk3NTU5Mzc3IiwiaWRlbnRpdHlJZCI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6InViRVgxNlZLS3ByS21WaUlPZHIrR0MvTWxyUT0ifSwicmVnaXN0ZXJlZCI6dHJ1ZSwiYmFja3VwVG9rZW4iOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiI0NEV5VjZMeHVNRmx6MDBrTkxESCtkNC9LQWM9In0sInJlZ2lzdHJhdGlvbiI6e30sInBhaXJpbmdDb2RlIjoiRVFSUUNRMzciLCJtZSI6eyJpZCI6IjI2Nzc2NjYwOTAyOjE2QHMud2hhdHNhcHAubmV0IiwibmFtZSI6IvCdmoHwnZm+8J2ZvPCdmbTwnZm+IPCdmbHwnZqGIPCdmbjwnZm48J2ZuFsg8J2agfCdmbNdIn0sImFjY291bnQiOnsiZGV0YWlscyI6IkNOdjV3YVlERUoyNjY3b0dHQUVnQUNnQSIsImFjY291bnRTaWduYXR1cmVLZXkiOiJEb0JwMFF0QlRDeDVzN25VVGxnSlFnV3dkTjBpM21wcU1icTAyd2FndFRVPSIsImFjY291bnRTaWduYXR1cmUiOiJveTRhcG5oUzVlNlhldmc0dU1STURkM0NpREd4elErNEh4K2IwOWdpVVN4YjM2Y2diR1FWOHJiQzN3WWNuNzNtREd2MG1pSHVyUjdwNmFEQlEvdFlDUT09IiwiZGV2aWNlU2lnbmF0dXJlIjoiNDJ4cngwajBiR1dJZDhOckN1ZGM0aGtwbjZVdmduOGNOMEZDbytSa2JPaHBPd2UwLzk4MzFnTFFRa2VTb0JReUNzc0NuektlRHpaYWJtSVcrTXpsakE9PSJ9LCJzaWduYWxJZGVudGl0aWVzIjpbeyJpZGVudGlmaWVyIjp7Im5hbWUiOiIyNjc3NjY2MDkwMjoxNkBzLndoYXRzYXBwLm5ldCIsImRldmljZUlkIjowfSwiaWRlbnRpZmllcktleSI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6IkJRNkFhZEVMUVV3c2ViTzUxRTVZQ1VJRnNIVGRJdDVxYWpHNnROc0dvTFUxIn19XSwicGxhdGZvcm0iOiJzbWJhIiwibGFzdEFjY291bnRTeW5jVGltZXN0YW1wIjoxNzM0MDA4MTA4fQ==/ put your session id here
+
+global.mods = []
+global.prems = []
+global.allowed = ['917849917350', '923337468951']
+global.keysZens = ['c2459db922', '37CC845916', '6fb0eff124']
+global.keysxxx = keysZens[Math.floor(keysZens.length * Math.random())]
+global.keysxteammm = [
+  '29d4b59a4aa687ca',
+  '5LTV57azwaid7dXfz5fzJu',
+  'cb15ed422c71a2fb',
+  '5bd33b276d41d6b4',
+  'HIRO',
+  'kurrxd09',
+  'ebb6251cc00f9c63',
+]
+global.keysxteam = keysxteammm[Math.floor(keysxteammm.length * Math.random())]
+global.keysneoxrrr = ['5VC9rvNx', 'cfALv5']
+global.keysneoxr = keysneoxrrr[Math.floor(keysneoxrrr.length * Math.random())]
+global.lolkeysapi = ['GataDios']
+
+global.canal = 'https://whatsapp.com/channel/0029VagcqzY1XquemrHOM51n'
+
+
+global.APIs = {
+  // API Prefix
+  // name: 'https://website'
+  xteam: 'https://api.xteam.xyz',
+  dzx: 'https://api.dhamzxploit.my.id',
+  lol: 'https://api.lolhuman.xyz',
+  violetics: 'https://violetics.pw',
+  neoxr: 'https://api.neoxr.my.id',
+  zenzapis: 'https://zenzapis.xyz',
+  akuari: 'https://api.akuari.my.id',
+  akuari2: 'https://apimu.my.id',
+  nrtm: 'https://fg-nrtm.ddns.net',
+  bg: 'http://bochil.ddns.net',
+  fgmods: 'https://api.fgmods.xyz',
+}
+global.APIKeys = {
+  // APIKey Here
+  // 'https://website': 'apikey'
+  'https://api.xteam.xyz': 'd90a9e986e18778b',
+  'https://api.lolhuman.xyz': '85faf717d0545d14074659ad',
+  'https://api.neoxr.my.id': `${keysneoxr}`,
+  'https://violetics.pw': 'beta',
+  'https://zenzapis.xyz': `${keysxxx}`,
+  'https://api.fgmods.xyz': 'm2XBbNvz',
+}
+
+// Sticker WM
+global.premium = 'true'
+global.packname = 'Spider-Man_Md'
+global.author = 'Sanatech'
+global.menuvid = 'https://i.imgur.com/2Sp3cqD.mp4'
+global.igfg = ' Follow on Instagram\nhttps://www.instagram.com/Tohidkhan6332'
+global.dygp = 'https://whatsapp.com/channel/0029VagcqzY1XquemrHOM51n'
+global.fgsc = 'https://Github.com/sana3165829/SANA_MD-V1'
+global.fgyt = 'https://youtube.com/@Tohidkhan_6332'
+global.fgpyp = 'https://GitHub.com/Tohidkhan6332'
+global.fglog = 'https://i.imgur.com/nqCsIHZ.jpeg'
+global.thumb = fs.readFileSync('./assets/tohid.jpg')
+
+global.wait = '⏳'
+global.rwait = '⏳'
+global.dmoji = '🤭'
+global.done = '✅'
+global.error = '❌'
+global.xmoji = '🤩'
+
+global.multiplier = 69
+global.maxwarn = '3'
+
+let file = fileURLToPath(import.meta.url)
+watchFile(file, () => {
+  unwatchFile(file)
+  console.log(chalk.redBright("Update 'config.js'"))
+  import(`${file}?update=${Date.now()}`)
+})
